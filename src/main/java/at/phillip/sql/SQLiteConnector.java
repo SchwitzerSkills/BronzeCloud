@@ -1,14 +1,12 @@
-package at.phillip.utils;
+package at.phillip.sql;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class SQLiteConnector {
 
-    private Connection connection;
+    public Connection connection;
     private final String dbPath = "database/database.sqlite";
 
     public void loadConfig() throws IOException {

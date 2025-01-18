@@ -5,10 +5,19 @@ import java.io.File;
 public class SetupManager {
 
     public void createFolders(){
-        File folder = new File("./static");
+        File staticFolder = new File("./static");
 
-        if(!folder.exists()){
-            if (!folder.mkdirs()) {
+        if(!staticFolder.exists()){
+            if (!staticFolder.mkdirs()) {
+                System.out.println("Failed to create the folder.");
+                return;
+            }
+        }
+
+        File softwareFolder = new File("./software");
+
+        if(!softwareFolder.exists()){
+            if (!softwareFolder.mkdirs()) {
                 System.out.println("Failed to create the folder.");
                 return;
             }

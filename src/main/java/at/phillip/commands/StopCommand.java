@@ -1,6 +1,9 @@
 package at.phillip.commands;
 
 import at.phillip.interfaces.Command;
+import at.phillip.sql.ServersSQL;
+import at.phillip.states.ServerStates;
+import at.phillip.utils.ProcessManager;
 import at.phillip.utils.ServerManager;
 
 import java.util.Arrays;
@@ -9,15 +12,29 @@ import java.util.List;
 
 public class StopCommand implements Command {
 
-    private final ServerManager serverManager;
-
-    public StopCommand(ServerManager serverManager){
-        this.serverManager = serverManager;
+    private final ServersSQL serversSQL;
+    public StopCommand(ServersSQL serversSQL){
+        this.serversSQL = serversSQL;
     }
 
     @Override
     public void execute(String[] args) {
-        System.out.println("Server wird gestoppt...");
+        if(args.length != 2){
+            return;
+        }
+        String serverName = args[1];
+
+        if (!serversSQL.isServerExist(serverName)) {
+            System.out.println("Server existiert nicht!");
+            return;
+        }
+
+        ProcessManager processManager = new ProcessManager();
+
+        processManager.destroyProcess(serverName);
+
+        serversSQL.updateStates(serverName, ServerStates.STOPPED);
+
     }
 
     @Override
@@ -33,7 +50,10 @@ public class StopCommand implements Command {
     @Override
     public List<String> getCompletions(int argIndex) {
         if (argIndex == 1) {
-            return serverManager.getServerNames();
+            if(serversSQL.getServers().isEmpty()){
+                return Collections.emptyList();
+            }
+            return serversSQL.getServers();
         } else if (argIndex == 2) {
             return Arrays.asList("force", "noforce");
         }

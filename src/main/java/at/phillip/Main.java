@@ -1,7 +1,7 @@
 package at.phillip;
 
 import at.phillip.console.ConsoleManager;
-import at.phillip.utils.SQLiteConnector;
+import at.phillip.sql.SQLiteConnector;
 import at.phillip.utils.SetupManager;
 
 import java.io.IOException;

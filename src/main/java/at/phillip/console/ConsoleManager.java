@@ -2,8 +2,9 @@ package at.phillip.console;
 
 import at.phillip.commands.*;
 import at.phillip.interfaces.Command;
+import at.phillip.sql.ServersSQL;
 import at.phillip.utils.ConsoleColors;
-import at.phillip.utils.SQLiteConnector;
+import at.phillip.sql.SQLiteConnector;
 import at.phillip.utils.ServerManager;
 import org.jline.reader.*;
 import org.jline.reader.impl.DefaultParser;
@@ -20,17 +21,21 @@ public class ConsoleManager {
 
     private final Map<String, Command> commands = new HashMap<>();
     private final ServerManager serverManager = new ServerManager();
+    private SQLiteConnector connector;
+    private ServersSQL serversSQL;
 
     public LineReader reader;
 
-    public ConsoleManager(){
-        registerCommands();
+    private void registerSQL(){
+        serversSQL = new ServersSQL(connector);
+        serversSQL.createServerTable();
     }
 
     private void registerCommands() {
-        addCommand(new StartCommand(serverManager));
-        addCommand(new StopCommand(serverManager));
+        addCommand(new StartCommand(serversSQL));
+        addCommand(new StopCommand(serversSQL));
         addCommand(new CreateCommand(serverManager));
+        addCommand(new TaskCommand(serversSQL));
 //        addCommand(new ListCommand());
 //        addCommand(new ReloadCommand());
     }
@@ -53,6 +58,11 @@ public class ConsoleManager {
                 .completer(completer)
                 .parser(new DefaultParser())
                 .build();
+
+        this.connector = connector;
+
+        registerSQL();
+        registerCommands();
 
         String prompt = ConsoleColors.GREEN + "root@BronzeCloud" + ConsoleColors.BLUE + " : " + ConsoleColors.RESET;
 
