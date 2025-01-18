@@ -3,6 +3,7 @@ package at.phillip.console;
 import at.phillip.commands.*;
 import at.phillip.interfaces.Command;
 import at.phillip.utils.ConsoleColors;
+import at.phillip.utils.SQLiteConnector;
 import at.phillip.utils.ServerManager;
 import org.jline.reader.*;
 import org.jline.reader.impl.DefaultParser;
@@ -18,33 +19,36 @@ import java.util.Map;
 public class ConsoleManager {
 
     private final Map<String, Command> commands = new HashMap<>();
-    private ServerManager serverManager = new ServerManager();
+    private final ServerManager serverManager = new ServerManager();
 
-    public ConsoleManager() {
+    public LineReader reader;
+
+    public ConsoleManager(){
         registerCommands();
     }
 
     private void registerCommands() {
         addCommand(new StartCommand(serverManager));
-        addCommand(new StopCommand());
+        addCommand(new StopCommand(serverManager));
         addCommand(new CreateCommand(serverManager));
 //        addCommand(new ListCommand());
 //        addCommand(new ReloadCommand());
     }
 
-    private void addCommand(Command command) {
+    public void addCommand(Command command) {
         commands.put(command.getName(), command);
         for (String alias : command.getAliases()) {
             commands.put(alias, command);
         }
     }
 
-    public void startConsole() throws IOException {
+    public void startConsole(SQLiteConnector connector) throws IOException {
+
         Terminal terminal = TerminalBuilder.builder().system(true).build();
 
         Completer completer = getCompletion();
 
-        LineReader reader = LineReaderBuilder.builder()
+        reader = LineReaderBuilder.builder()
                 .terminal(terminal)
                 .completer(completer)
                 .parser(new DefaultParser())
@@ -57,6 +61,9 @@ public class ConsoleManager {
                 String line = reader.readLine(prompt).trim();
                 handleCommand(line);
             } catch (UserInterruptException | EndOfFileException e) {
+                if(connector != null){
+                    connector.disconnect();
+                }
                 break;
             }
         }

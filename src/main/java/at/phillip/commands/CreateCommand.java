@@ -1,9 +1,7 @@
 package at.phillip.commands;
 
-import at.phillip.console.ConsoleManager;
 import at.phillip.interfaces.Command;
 import at.phillip.utils.ServerManager;
-import org.jline.reader.Completer;
 
 import java.util.Arrays;
 import java.util.Collections;
