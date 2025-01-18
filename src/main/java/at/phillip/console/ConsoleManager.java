@@ -32,6 +32,9 @@ public class ConsoleManager {
 
     private void addCommand(Command command) {
         commands.put(command.getName(), command);
+        for (String alias : command.getAliases()) {
+            commands.put(alias, command);
+        }
     }
 
     public void startConsole() throws IOException {
