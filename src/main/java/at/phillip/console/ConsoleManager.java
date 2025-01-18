@@ -3,29 +3,31 @@ package at.phillip.console;
 import at.phillip.commands.*;
 import at.phillip.interfaces.Command;
 import at.phillip.utils.ConsoleColors;
+import at.phillip.utils.ServerManager;
 import org.jline.reader.*;
 import org.jline.reader.impl.DefaultParser;
-import org.jline.reader.impl.completer.ArgumentCompleter;
-import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 
 public class ConsoleManager {
 
     private final Map<String, Command> commands = new HashMap<>();
+    private ServerManager serverManager = new ServerManager();
 
     public ConsoleManager() {
         registerCommands();
     }
 
     private void registerCommands() {
-        addCommand(new StartCommand());
+        addCommand(new StartCommand(serverManager));
         addCommand(new StopCommand());
+        addCommand(new CreateCommand(serverManager));
 //        addCommand(new ListCommand());
 //        addCommand(new ReloadCommand());
     }
@@ -39,12 +41,8 @@ public class ConsoleManager {
 
     public void startConsole() throws IOException {
         Terminal terminal = TerminalBuilder.builder().system(true).build();
-        String hostname = InetAddress.getLocalHost().getHostName();
 
-        Completer completer = new ArgumentCompleter(
-                new StringsCompleter(commands.keySet()),
-                new StringsCompleter("server1", "server2", "all")
-        );
+        Completer completer = getCompletion();
 
         LineReader reader = LineReaderBuilder.builder()
                 .terminal(terminal)
@@ -52,7 +50,7 @@ public class ConsoleManager {
                 .parser(new DefaultParser())
                 .build();
 
-        String prompt = ConsoleColors.GREEN + "root@" + hostname + ConsoleColors.BLUE + " : " + ConsoleColors.RESET;
+        String prompt = ConsoleColors.GREEN + "root@BronzeCloud" + ConsoleColors.BLUE + " : " + ConsoleColors.RESET;
 
         while (true) {
             try {
@@ -75,5 +73,27 @@ public class ConsoleManager {
         } else {
             System.out.println(ConsoleColors.RED + "Unbekannter Befehl: " + args[0] + ConsoleColors.RESET);
         }
+    }
+
+    public Completer getCompletion(){
+        return (reader, line, candidates) -> {
+            if (line.wordIndex() == 0) {
+                for (String command : commands.keySet()) {
+                    candidates.add(new Candidate(command));
+                }
+            } else {
+                String commandName = line.words().getFirst();
+                Command command = commands.get(commandName);
+
+                if (command != null) {
+                    int argIndex = line.wordIndex();
+                    List<String> completions = command.getCompletions(argIndex);
+
+                    for (String completion : completions) {
+                        candidates.add(new Candidate(completion));
+                    }
+                }
+            }
+        };
     }
 }
