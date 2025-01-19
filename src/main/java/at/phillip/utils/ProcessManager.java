@@ -10,7 +10,7 @@ import java.nio.file.StandardCopyOption;
 public class ProcessManager {
 
     public void makeProcess(String serverName, File softwarePath, int port, String softwareName){
-        File workDirectory = new File("./static/Test-1");
+        File workDirectory = new File("./static/" + serverName);
 
         if(!workDirectory.exists()){
             if (workDirectory.mkdirs()) {
@@ -33,26 +33,11 @@ public class ProcessManager {
             System.out.println("Software-Datei existiert bereits: " + softwareName);
         }
 
-        File eulaFile = new File(workDirectory, "eula.txt");
-        if (!eulaFile.exists()) {
-            try (FileWriter fileWriter = new FileWriter(eulaFile)) {
-                fileWriter.write("eula=true");
-                System.out.println("eula.txt wurde erstellt.");
-            } catch (IOException e) {
-                System.out.println("Fehler beim Erstellen von eula.txt: " + e.getMessage());
-                return;
-            }
-        }
-
-        File serverPropertiesFile = new File(workDirectory, "server.properties");
-        if (!serverPropertiesFile.exists()) {
-            try (FileWriter fileWriter = new FileWriter(serverPropertiesFile)) {
-                fileWriter.write("server-port=" + port);
-                System.out.println("server.properties wurde erstellt.");
-            } catch (IOException e) {
-                System.out.println("Fehler beim Erstellen von server.properties: " + e.getMessage());
-                return;
-            }
+        if(!softwareName.contains("bungeecord")) {
+            createConfig(workDirectory, "eula=true", "eula.txt");
+            createConfig(workDirectory, "server-port=" + port, "server.properties");
+        } else {
+            createConfig(workDirectory, "host=0.0.0.0:" + port, "config.yml");
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder(
@@ -76,6 +61,19 @@ public class ProcessManager {
             System.out.println("Screen session " + serverName + " terminated.");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void createConfig(File workDirectory, String write, String fileName){
+        File serverPropertiesFile = new File(workDirectory, fileName);
+        if (!serverPropertiesFile.exists()) {
+            try (FileWriter fileWriter = new FileWriter(serverPropertiesFile)) {
+                fileWriter.write(write);
+                System.out.println(fileName + " wurde erstellt.");
+            } catch (IOException e) {
+                System.out.println("Fehler beim Erstellen: " + e.getMessage());
+                return;
+            }
         }
     }
 }

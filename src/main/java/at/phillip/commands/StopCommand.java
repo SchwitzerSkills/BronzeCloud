@@ -48,13 +48,13 @@ public class StopCommand implements Command {
     }
 
     @Override
-    public List<String> getCompletions(int argIndex) {
-        if (argIndex == 1) {
+    public List<String> getCompletions(String[] argIndex) {
+        if (argIndex.length == 2) {
             if(serversSQL.getServers().isEmpty()){
                 return Collections.emptyList();
             }
             return serversSQL.getServers();
-        } else if (argIndex == 2) {
+        } else if (argIndex.length == 3) {
             return Arrays.asList("force", "noforce");
         }
         return Collections.emptyList();

@@ -15,8 +15,8 @@ public class Main {
             connector.loadConfig();
             connector.connect();
 
-            consoleManager.startConsole(connector);
             new SetupManager().createFolders();
+            consoleManager.startConsole(connector);
 
         } catch (IOException e) {
             System.out.println("Fehler beim Laden der Konfiguration: " + e.getMessage());

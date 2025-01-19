@@ -25,9 +25,11 @@ public class StartCommand implements Command {
         }
 
         String serverName = args[1];
+        String serverSoftware = serversSQL.getServerSoftware(serverName).toLowerCase();
+        String serverVersion = serversSQL.getServerVersion(serverName).toLowerCase();
 
         ProcessManager processManager = new ProcessManager();
-        processManager.makeProcess(serverName, new File(""), 0, "paper-latest.jar");
+        processManager.makeProcess(serverName, new File(""), 0, serverSoftware + "-" + serverVersion + ".jar");
 
         serversSQL.updateStates(serverName, ServerStates.STARTED);
 
@@ -44,13 +46,13 @@ public class StartCommand implements Command {
     }
 
     @Override
-    public List<String> getCompletions(int argIndex) {
-        if (argIndex == 1) {
+    public List<String> getCompletions(String[] argIndex) {
+        if (argIndex.length == 2) {
             if(serversSQL.getServers().isEmpty()){
                 return Collections.emptyList();
             }
             return serversSQL.getServers();
-        } else if (argIndex == 2) {
+        } else if (argIndex.length == 3) {
             return Arrays.asList("force");
         }
         return Collections.emptyList();

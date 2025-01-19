@@ -78,6 +78,51 @@ public class ServersSQL {
         return false;
     }
 
+    public ServerStates getServerState(String serverName){
+        String sql = "SELECT server_state FROM servers WHERE server_name=?";
+        try(PreparedStatement preparedStatement = connector.connection.prepareStatement(sql)){
+            preparedStatement.setString(1, serverName);
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                if (resultSet.next()){
+                    return ServerStates.valueOf(resultSet.getString("server_state"));
+                }
+            } catch (SQLException e){
+            }
+        } catch (SQLException e){
+        }
+        return ServerStates.valueOf(null);
+    }
+
+    public boolean isProxyExist(){
+        String sql = "SELECT COUNT(server_software) FROM servers WHERE server_software=?";
+        try(PreparedStatement preparedStatement = connector.connection.prepareStatement(sql)){
+            preparedStatement.setString(1, "PROXY");
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                if (resultSet.next()){
+                    return resultSet.getBoolean("count");
+                }
+            } catch (SQLException e){
+            }
+        } catch (SQLException e){
+        }
+        return false;
+    }
+
+    public boolean isServerNameExist(String server_name){
+        String sql = "SELECT COUNT(server_name) FROM servers WHERE server_name LIKE ?";
+        try(PreparedStatement preparedStatement = connector.connection.prepareStatement(sql)){
+            preparedStatement.setString(1, server_name + "%");
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                if (resultSet.next()){
+                    return resultSet.getBoolean("count");
+                }
+            } catch (SQLException e){
+            }
+        } catch (SQLException e){
+        }
+        return false;
+    }
+
     public void updateStates(String serverName, ServerStates states){
         String sql = "UPDATE servers SET server_state=? WHERE server_name=?";
 
@@ -88,5 +133,55 @@ public class ServersSQL {
             preparedStatement.executeUpdate();
         } catch (SQLException e){
         }
+    }
+
+    public String getServerSoftware(String serverName){
+        String sql = "SELECT server_software FROM servers WHERE server_name=?";
+
+        try (PreparedStatement preparedStatement = connector.connection.prepareStatement(sql)){
+            preparedStatement.setString(1, serverName);
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                if(resultSet.next()){
+                    return resultSet.getString("server_software");
+                }
+            } catch (SQLException e){
+            }
+        } catch (SQLException e){
+        }
+        return "";
+    }
+    public String getServerVersion(String serverName){
+        String sql = "SELECT server_version FROM servers WHERE server_name=?";
+
+        try (PreparedStatement preparedStatement = connector.connection.prepareStatement(sql)){
+            preparedStatement.setString(1, serverName);
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                if(resultSet.next()){
+                    return resultSet.getString("server_version");
+                }
+            } catch (SQLException e){
+            }
+        } catch (SQLException e){
+        }
+        return "";
+    }
+
+    public boolean isPortUsed(int port){
+        String sql = "SELECT COUNT(server_port) as count FROM servers WHERE server_port=?";
+
+        try (PreparedStatement preparedStatement = connector.connection.prepareStatement(sql)){
+            preparedStatement.setInt(1, port);
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()){
+                if(resultSet.next()){
+                    return resultSet.getBoolean("count");
+                }
+            } catch (SQLException e){
+            }
+        } catch (SQLException e){
+        }
+        return false;
     }
 }
