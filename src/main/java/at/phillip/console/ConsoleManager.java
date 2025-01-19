@@ -102,22 +102,30 @@ public class ConsoleManager {
         }
     }
 
-    public Completer getCompletion(){
+    public Completer getCompletion() {
         return (reader, line, candidates) -> {
             if (line.wordIndex() == 0) {
+                String prefix = line.line().trim();
                 for (String command : commands.keySet()) {
-                    candidates.add(new Candidate(command));
+                    if (command.startsWith(prefix)) {
+                        candidates.add(new Candidate(command));
+                    }
                 }
             } else {
-                String commandName = line.words().getFirst();
+                String commandName = line.words().getFirst().trim();
                 Command command = commands.get(commandName);
 
                 if (command != null) {
                     String[] argIndex = line.words().toArray(new String[0]);
                     List<String> completions = command.getCompletions(argIndex);
 
-                    for (String completion : completions) {
-                        candidates.add(new Candidate(completion));
+                    if(completions != null){
+                        String currentArgument = line.words().get(line.wordIndex());
+                        for (String completion : completions) {
+                            if(completion.startsWith(currentArgument)) {
+                                candidates.add(new Candidate(completion));
+                            }
+                        }
                     }
                 }
             }
