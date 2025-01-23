@@ -1,7 +1,6 @@
 package at.phillip.sql;
 
 import at.phillip.states.ServerStates;
-import at.phillip.states.ServerTypes;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,51 +9,47 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ServersSQL {
+public class ServersSQLSQLITE {
 
-    private final MySQLConnector connector;
+    private final SQLiteConnector connector;
 
-    public ServersSQL(MySQLConnector connector){
+    public ServersSQLSQLITE(SQLiteConnector connector){
         this.connector = connector;
     }
 
     public void createServerTable(){
         String sql = "CREATE TABLE IF NOT EXISTS servers (" +
-                "id INTEGER PRIMARY KEY AUTO_INCREMENT," +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "server_name VARCHAR(255) NOT NULL," +
                 "server_port INTEGER(5) NOT NULL," +
                 "server_software VARCHAR(255) NOT NULL," +
                 "server_version VARCHAR(255) NOT NULL," +
-                "server_type VARCHAR(255) NOT NULL," +
                 "server_state VARCHAR(255) NOT NULL)";
-        try (Statement statement = connector.getConnection().createStatement()){
+        try (Statement statement = connector.connection.createStatement()){
             statement.execute(sql);
         } catch (SQLException e){
-            e.printStackTrace();
         }
     }
 
-    public void insertServer(String serverName, int port, String software, String version, ServerTypes type, ServerStates states){
+    public void insertServer(String serverName, int port, String software, String version, ServerStates states){
         String sql = "INSERT INTO servers " +
-                "(server_name, server_port, server_software, server_version, server_type, server_state) VALUES " +
-                "(?, ?, ?, ?, ?, ?)";
+                "(server_name, server_port, server_software, server_version, server_state) VALUES " +
+                "(?, ?, ?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connector.connection.prepareStatement(sql)){
             preparedStatement.setString(1, serverName);
             preparedStatement.setInt(2, port);
             preparedStatement.setString(3, software);
             preparedStatement.setString(4, version);
-            preparedStatement.setString(5, type.toString());
-            preparedStatement.setString(6, states.toString());
+            preparedStatement.setString(5, states.toString());
 
             preparedStatement.executeUpdate();
         } catch (SQLException e){
-            e.printStackTrace();
         }
     }
 
     public List<String> getServers(){
-        String sql = "SELECT * FROM servers;";
+        String sql = "SELECT * FROM servers";
         List<String> list = new ArrayList<>();
         try(PreparedStatement preparedStatement = connector.connection.prepareStatement(sql)){
             try(ResultSet resultSet = preparedStatement.executeQuery()){
@@ -271,22 +266,4 @@ public class ServersSQL {
         }
         return false;
     }
-
-    public int getPort(String serverName){
-        String sql = "SELECT server_port FROM servers WHERE server_name=?";
-
-        try (PreparedStatement preparedStatement = connector.getConnection().prepareStatement(sql)){
-            preparedStatement.setString(1, serverName);
-
-            try(ResultSet resultSet = preparedStatement.executeQuery()){
-                if(resultSet.next()){
-                    return resultSet.getInt("server_port");
-                }
-            } catch (SQLException e){
-            }
-        } catch (SQLException e){
-        }
-        return 0;
-    }
-
 }

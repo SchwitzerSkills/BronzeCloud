@@ -1,29 +1,30 @@
 package at.phillip.console;
 
-import at.phillip.commands.*;
+import at.phillip.commands.TaskCommand;
 import at.phillip.interfaces.Command;
-import at.phillip.sql.*;
-import at.phillip.utils.*;
+import at.phillip.sql.SQLiteConnector;
+import at.phillip.sql.ServersSQL;
+import at.phillip.utils.ConsoleColors;
+import at.phillip.utils.RedisManager;
+import at.phillip.utils.ScreenManager;
+import at.phillip.utils.ServerManager;
 import org.jline.reader.*;
 import org.jline.reader.impl.DefaultParser;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
-import java.io.*;
-import java.sql.SQLException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-public class ConsoleManager {
+public class ConsoleManagerSQLITE {
 
     private final Map<String, Command> commands = new HashMap<>();
     private ServerManager serverManager;
-    private MySQLConnector connector = new MySQLConnector();
+    private SQLiteConnector connector;
     private ServersSQL serversSQL;
-    private PermsSQL permsSQL;
-    private PlayersSQL playersSQL;
     private final ScreenManager screenManager = new ScreenManager();
     private Terminal terminal;
     private RedisManager redisManager;
@@ -32,19 +33,12 @@ public class ConsoleManager {
 
 
     private void registerSQL(){
-        serversSQL = new ServersSQL(connector);
-        serversSQL.createServerTable();
-
-        permsSQL = new PermsSQL(connector);
-        permsSQL.createServerTable();
-
-        playersSQL = new PlayersSQL(connector);
-        playersSQL.createServerTable();
+//        serversSQL = new ServersSQL(connector);
+//        serversSQL.createServerTable();
     }
 
     private void registerCommands() {
         addCommand(new TaskCommand(serversSQL, screenManager, terminal, redisManager));
-        addCommand(new PermsCommand(serversSQL, redisManager, permsSQL, playersSQL));
 //        addCommand(new ListCommand());
 //        addCommand(new ReloadCommand());
     }
@@ -56,7 +50,7 @@ public class ConsoleManager {
         }
     }
 
-    public void startConsole() throws IOException, SQLException, ClassNotFoundException {
+    public void startConsole(SQLiteConnector connector) throws IOException {
 
         terminal = TerminalBuilder.builder().system(true).build();
 
@@ -68,8 +62,7 @@ public class ConsoleManager {
                 .parser(new DefaultParser())
                 .build();
 
-        connector.loadConfig(reader);
-        connector.connect();
+        this.connector = connector;
 
         registerSQL();
         redisManager = new RedisManager(serversSQL);

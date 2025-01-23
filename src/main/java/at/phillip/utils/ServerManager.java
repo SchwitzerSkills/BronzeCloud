@@ -18,7 +18,7 @@ public class ServerManager {
         List<String> servers = serversSQL.getServers();
 
         servers.forEach(server -> {
-            if(serversSQL.getServerState(server) == ServerStates.STARTED) {
+            if(serversSQL.getServerState(server) == ServerStates.STARTING || serversSQL.getServerState(server) == ServerStates.STARTED || serversSQL.getServerState(server) == ServerStates.STOPPING) {
                 processManager.destroyProcess(server);
                 serversSQL.updateStates(server, ServerStates.STOPPED);
                 System.out.println(server + ": stopped");
@@ -35,7 +35,7 @@ public class ServerManager {
                 String serverSoftware = serversSQL.getServerSoftware(server).toLowerCase();
                 String serverVersion = serversSQL.getServerVersion(server).toLowerCase();
                 processManager.makeProcess(server, new File(""), 0, serverSoftware + "-" + serverVersion + ".jar");
-                serversSQL.updateStates(server, ServerStates.STARTED);
+                serversSQL.updateStates(server, ServerStates.STARTING);
                 System.out.println(server + ": start");
             }
         });

@@ -5,7 +5,12 @@ import java.net.*;
 public class DownloadManager {
 
     public void downloadFile(String fileURL, String saveDir, String newFileName) throws IOException {
-        URL url = new URL(fileURL);
+        URL url = null;
+        try {
+            url = new URI(fileURL).toURL();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 

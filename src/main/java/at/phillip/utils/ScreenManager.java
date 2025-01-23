@@ -1,17 +1,20 @@
 package at.phillip.utils;
 
 
+import at.phillip.sql.ServersSQL;
 import org.jline.terminal.Terminal;
 
 import java.io.*;
 
 public class ScreenManager {
 
-    public void monitorLogs(Terminal terminal, String serverName) {
-        File logFile = new File("./static/" + serverName + "/logs/latest.log");
-
-        terminal.writer().println("\033[H\033[J");
-        terminal.writer().println("\033[H\033[2J");
+    public void monitorLogs(Terminal terminal, String serverName, ServersSQL serversSQL) {
+        File logFile;
+        if(serversSQL.getServerSoftware(serverName).toLowerCase().equalsIgnoreCase("bungeecord")){
+            logFile = new File("./static/" + serverName + "/proxy.log.0");
+        } else {
+            logFile = new File("./static/" + serverName + "/logs/latest.log");
+        }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
             long filePointer = 0;
